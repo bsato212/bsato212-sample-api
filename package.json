@@ -1,0 +1,27 @@
+{
+  "name": "bsato212-sample-api",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "repository": "git@github.com:bsato212/bsato212-sample-api.git",
+  "author": "Bruno Borsato <brunoborsato@outlook.com>",
+  "license": "MIT",
+  "engines": {
+    "node": "8"
+  },
+  "scripts": {
+    "lint": "./node_modules/eslint/bin/eslint.js src",
+    "test": "echo no tests",
+    "start": "nodemon src/index.js",
+    "heroku": "node src/index.js"
+  },
+  "devDependencies": {
+    "eslint": "^5.7.0",
+    "nodemon": "^1.18.4"
+  },
+  "dependencies": {
+    "compression": "^1.7.3",
+    "express": "^4.16.4",
+    "helmet": "^3.14.0",
+    "morgan": "^1.9.1"
+  }
+}
