@@ -1,0 +1,89 @@
+<nav class="navbar sticky-top navbar-dark bg-primary">
+  <span class="navbar-brand mb-0 h1">ES7 Sample</span>
+</nav>
+
+<div class="container">
+  <br><div class="row">
+    <div class="col">
+      <h1>ES7 Sample</h1>
+    </div>
+  </div>
+  <br><div class="row">
+    <div class="col">
+      <form>
+          <div class="form-group">
+            <label for="selectPost">Select Post</label>
+            <select class="form-control" name="selectPost" id="selectPost">
+              {{#each posts}}
+                <option>{{this}}</option>
+              {{/each}}
+            </select>
+          </div>
+      </form>
+    </div>
+  </div>
+  <br><div class="row">
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Post</h5>
+          <p class="card-text">postId: <span id="postId"></span></p>
+          <p class="card-text">authorId: <span id="authorId"></span></p>
+          <p class="card-text">loadTime: <span id="postLoadTime"></span></p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Author</h5>
+          <p class="card-text">firstName: <span id="firstName"></span> </p>
+          <p class="card-text">lastName: <span id="lastName"></span></p>
+          <p class="card-text">loadTime: <span id="authorLoadTime"></span></p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <br><br><div class="row">
+    <div class="col">
+      <a href="#" class="btn btn-primary" id="loadAll">Load</a><br>
+    </div>
+  </div>
+</div>
+
+<script>
+  function loadPost( postId ) {
+    const url = `/v1/posts/${postId}?cb=${Date.now()}`;
+    return fetch( url )
+      .then( response => response.json() )
+      .then( responseAsJson => responseAsJson )
+      .catch( error => console.error( error ) );
+  }
+
+  function loadAuthor( authorId ) {
+    const url = `/v1/authors/${authorId}?cb=${Date.now()}`;
+    return fetch( url )
+      .then( response => response.json() )
+      .then( responseAsJson => responseAsJson )
+      .catch( error => console.error( error ) );
+  }
+
+  const loadAll = document.querySelector( "#loadAll" );
+  loadAll.addEventListener( "click", async event => {
+    const selectPost = document.querySelector( "#selectPost" );
+    const postId = selectPost.options[ selectPost.selectedIndex ].text;
+    const startTimePost = Date.now();
+    let startTimeAuthor;
+
+    const postResponse = await loadPost( postId );
+    document.querySelector( "#postId" ).innerHTML = postId;
+    document.querySelector( "#authorId" ).innerHTML = postResponse.authorId;
+    document.querySelector( "#postLoadTime" ).innerHTML = Date.now() - startTimePost;
+    startTimeAuthor = Date.now();
+
+    authorReponse = await loadAuthor( postResponse.authorId );
+    document.querySelector( "#firstName" ).innerHTML = authorReponse[ 0 ].firstName;
+    document.querySelector( "#lastName" ).innerHTML = authorReponse[ 0 ].lastName;
+    document.querySelector( "#authorLoadTime" ).innerHTML = Date.now() - startTimeAuthor;
+  } );
+</script>
