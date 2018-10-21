@@ -27,7 +27,7 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Post</h5>
-          <p class="card-text">postId: <span id="postId"></span></p>
+          <p class="card-text">postTitle: <span id="postTitle"></span></p>
           <p class="card-text">authorId: <span id="authorId"></span></p>
           <p class="card-text">loadTime: <span id="postLoadTime"></span></p>
         </div>
@@ -52,6 +52,18 @@
 </div>
 
 <script>
+  function updatePost( postResponse, loadTime ) {
+    document.querySelector( "#postTitle" ).innerHTML = postResponse.title;
+    document.querySelector( "#authorId" ).innerHTML = postResponse.authorId;
+    document.querySelector( "#postLoadTime" ).innerHTML = loadTime;
+  }
+
+  function updateAuthor( authorResponse, loadTime ) {
+    document.querySelector( "#firstName" ).innerHTML = authorResponse.firstName;
+    document.querySelector( "#lastName" ).innerHTML = authorResponse.lastName;
+    document.querySelector( "#authorLoadTime" ).innerHTML = loadTime;
+  }
+
   function loadPost( postId ) {
     const url = `/v1/posts/${postId}?cb=${Date.now()}`;
     return fetch( url )
@@ -77,16 +89,12 @@
 
     loadPost( postId )
       .then( postResponse => {
-        document.querySelector( "#postId" ).innerHTML = postId;
-        document.querySelector( "#authorId" ).innerHTML = postResponse.authorId;
-        document.querySelector( "#postLoadTime" ).innerHTML = Date.now() - startTimePost;
+        updatePost( postResponse, Date.now() - startTimePost );
         startTimeAuthor = Date.now();
         return loadAuthor( postResponse.authorId );
       } )
       .then( authorReponse => {
-        document.querySelector( "#firstName" ).innerHTML = authorReponse[ 0 ].firstName;
-        document.querySelector( "#lastName" ).innerHTML = authorReponse[ 0 ].lastName;
-        document.querySelector( "#authorLoadTime" ).innerHTML = Date.now() - startTimeAuthor;
+        updateAuthor( authorReponse, Date.now() - startTimeAuthor );
       } )
       .catch( error => console.error( error ) );
   } );

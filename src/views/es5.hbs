@@ -27,7 +27,7 @@
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Post</h5>
-          <p class="card-text">postId: <span id="postId"></span></p>
+          <p class="card-text">postTitle: <span id="postTitle"></span></p>
           <p class="card-text">authorId: <span id="authorId"></span></p>
           <p class="card-text">loadTime: <span id="postLoadTime"></span></p>
         </div>
@@ -52,6 +52,18 @@
 </div>
 
 <script>
+  function updatePost( postResponse, loadTime ) {
+    document.getElementById( "postTitle" ).innerHTML = postResponse.title;
+    document.getElementById( "authorId" ).innerHTML = postResponse.authorId;
+    document.getElementById( "postLoadTime" ).innerHTML = loadTime;
+  }
+
+  function updateAuthor( authorResponse, loadTime ) {
+    document.getElementById( "firstName" ).innerHTML = authorResponse.firstName;
+    document.getElementById( "lastName" ).innerHTML = authorResponse.lastName;
+    document.getElementById( "authorLoadTime" ).innerHTML = loadTime;
+  }
+
   var loadAll = document.getElementById( "loadAll" );
   loadAll.addEventListener( "click", function( event ) {
     var selectPost = document.getElementById( "selectPost" );
@@ -63,29 +75,22 @@
     xhrPost.open( "GET", urlPost );
     xhrPost.onload = function() {
       if ( xhrPost.status === 200 ) {
-        document.getElementById( "postId" ).innerHTML = postId;
-
-        var responsePost = JSON.parse( xhrPost.responseText );
-        document.getElementById( "authorId" ).innerHTML = responsePost.authorId;
-        document.getElementById( "postLoadTime" ).innerHTML = Date.now() - startTimePost;
+        var postResponse = JSON.parse( xhrPost.responseText );
+        updatePost( postResponse, Date.now() - startTimePost );
 
         var startTimeAuthor = Date.now();
         var xhrAuthor = new XMLHttpRequest();
-        var urlAuthor = "/v1/authors/" + responsePost.authorId + "?cb=" + Date.now();
+        var urlAuthor = "/v1/authors/" + postResponse.authorId + "?cb=" + Date.now();
         xhrAuthor.open( "GET", urlAuthor );
         xhrAuthor.onload = function() {
           if ( xhrAuthor.status === 200 ) {
-            var responseAuthor = JSON.parse( xhrAuthor.responseText );
-            document.getElementById( "firstName" ).innerHTML = responseAuthor[ 0 ].firstName;
-            document.getElementById( "lastName" ).innerHTML = responseAuthor[ 0 ].lastName;
-            document.getElementById( "authorLoadTime" ).innerHTML = Date.now() - startTimeAuthor;
+            var authorResponse = JSON.parse( xhrAuthor.responseText );
+            updateAuthor( authorResponse, Date.now() - startTimeAuthor );
           }
         };
-
         xhrAuthor.send();
       }
     };
-
     xhrPost.send();
   } );
 </script>

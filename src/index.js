@@ -106,7 +106,7 @@ app.post( `/${apiVersion}/authors`, ( req, res ) => {
 app.get( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
   let query;
 
-  if ( req.params.postId ) {
+  if ( req.params.authorId ) {
     query = Author.findByPk( req.params.authorId );
   } else {
     query = Author.findAll();
