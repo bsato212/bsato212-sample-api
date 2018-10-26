@@ -11,12 +11,44 @@ const apiVersion = 'v1';
 const { GraphQLServer } = require( 'graphql-yoga' );
 const typeDefs = `
   type Query {
-    hello(name: String): String!
+    posts: [Post!]!
+    authors: [Author!]!
+    post(id: ID): Post!
+    author(id: ID): Author!
+  }
+
+  type Post {
+    id: ID!
+    authorId: ID!
+    title: String!
+    body: String!
+    createdAt: String!
+    updatedAt: String!
+  }
+
+  type Author {
+    id: ID!
+    firstName: String!
+    lastName: String!
+    createdAt: String!
+    updatedAt: String!
   }
 `;
+
 const resolvers = {
   Query: {
-    hello: ( _, { name } ) => `Hello ${name || 'World'}`,
+    posts: async () => {
+      return await Post.findAll();
+    },
+    authors: async () => {
+      return await Author.findAll();
+    },
+    post: async ( _, { id } ) => {
+      return await Post.findByPk( id );
+    },
+    author: async ( _, { id } ) => {
+      return await Author.findByPk( id );
+    },
   },
 };
 
