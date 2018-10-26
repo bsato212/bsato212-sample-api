@@ -8,15 +8,31 @@ const path = require( 'path' );
 const { Post, Author } = require( './sequelize' );
 const apiVersion = 'v1';
 
-const app = express();
-app.use( helmet() );
-app.use( compression() );
-app.use( express.json() );
-app.set( 'views', path.join( __dirname, 'views' ) );
-app.set( 'view engine', 'hbs' );
-app.use( morgan( 'short' ) );
+const { GraphQLServer } = require( 'graphql-yoga' );
+const typeDefs = `
+  type Query {
+    hello(name: String): String!
+  }
+`;
+const resolvers = {
+  Query: {
+    hello: ( _, { name } ) => `Hello ${name || 'World'}`,
+  },
+};
 
-app.get( '/', ( req, res ) => {
+const server = new GraphQLServer( {
+  typeDefs,
+  resolvers,
+} );
+
+server.express.use( helmet() );
+server.express.use( compression() );
+server.express.use( express.json() );
+server.express.set( 'views', path.join( __dirname, 'views' ) );
+server.express.set( 'view engine', 'hbs' );
+server.express.use( morgan( 'short' ) );
+
+server.express.get( '/', ( req, res ) => {
   res.status( 200 ).json( {
     apiVersion,
     endpoints: [
@@ -25,11 +41,14 @@ app.get( '/', ( req, res ) => {
       'es5',
       'es6',
       'es7',
+      'graphql',
+      'subscriptions',
+      'playground',
     ],
   } );
 } );
 
-app.get( '/es5', ( req, res ) => {
+server.express.get( '/es5', ( req, res ) => {
   Post.findAll()
     .then( result => {
       const posts = result.map( item => item.id );
@@ -41,7 +60,7 @@ app.get( '/es5', ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.get( '/es6', ( req, res ) => {
+server.express.get( '/es6', ( req, res ) => {
   Post.findAll()
     .then( result => {
       const posts = result.map( item => item.id );
@@ -53,7 +72,7 @@ app.get( '/es6', ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.get( '/es7', ( req, res ) => {
+server.express.get( '/es7', ( req, res ) => {
   Post.findAll()
     .then( result => {
       const posts = result.map( item => item.id );
@@ -65,13 +84,13 @@ app.get( '/es7', ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.post( `/${apiVersion}/posts`, ( req, res ) => {
+server.express.post( `/${apiVersion}/posts`, ( req, res ) => {
   Post.create( req.body )
     .then( result => res.json( result ) )
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.get( `/${apiVersion}/posts/:postId?`, ( req, res ) => {
+server.express.get( `/${apiVersion}/posts/:postId?`, ( req, res ) => {
   let query;
 
   if ( req.params.postId ) {
@@ -85,7 +104,7 @@ app.get( `/${apiVersion}/posts/:postId?`, ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.patch( `/${apiVersion}/posts/:postId?`, ( req, res ) => {
+server.express.patch( `/${apiVersion}/posts/:postId?`, ( req, res ) => {
   Post.update( req.body, {
     where: {
       id: req.params.postId,
@@ -97,13 +116,13 @@ app.patch( `/${apiVersion}/posts/:postId?`, ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.post( `/${apiVersion}/authors`, ( req, res ) => {
+server.express.post( `/${apiVersion}/authors`, ( req, res ) => {
   Author.create( req.body )
     .then( result => res.json( result ) )
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.get( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
+server.express.get( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
   let query;
 
   if ( req.params.authorId ) {
@@ -117,7 +136,7 @@ app.get( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.patch( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
+server.express.patch( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
   Author.update( req.body, {
     where: {
       id: req.params.authorId,
@@ -129,4 +148,10 @@ app.patch( `/${apiVersion}/authors/:authorId?`, ( req, res ) => {
     .catch( error => res.status( 500 ).json( error ) );
 } );
 
-app.listen( process.env.PORT );
+server.start( {
+  port: process.env.PORT,
+  endpoint: '/graphql',
+  subscriptions: '/subscriptions',
+  playground: '/playground',
+  debug: true,
+} );
